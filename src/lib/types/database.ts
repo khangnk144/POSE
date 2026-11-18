@@ -235,7 +235,10 @@ isOneToOne: false
                 }
           }
           Functions: {
-            "immutable_unaccent":
+            "consume_ai_quota":
+{ Args: { "p_limit": number,"p_user_id": string }; Returns: number
+                           },
+"immutable_unaccent":
 { Args: { "input": string }; Returns: string
                            },
 "is_admin":

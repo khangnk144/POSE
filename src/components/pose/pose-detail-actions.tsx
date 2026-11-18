@@ -9,7 +9,7 @@ import { Button } from '@/components/ui/button';
 import { IconButton } from '@/components/ui/icon-button';
 import { useToast } from '@/components/ui/toast';
 import { createSupabaseBrowserClient } from '@/lib/supabase/browser-client';
-import { AddToShootSheet } from './add-to-shoot-sheet';
+import { AddToShootSheet } from '@/components/shoot/add-to-shoot-sheet';
 import { PoseHeartButton } from './pose-heart-button';
 
 type Props = {

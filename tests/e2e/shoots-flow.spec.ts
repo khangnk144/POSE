@@ -29,9 +29,12 @@ test('shoot: create, reorder by keyboard, mark done, reload keeps state', async 
 
   // Move A below B with the keyboard sensor: focus handle, Space to lift, ArrowDown, Space to drop.
   const handle = page.getByRole('button', { name: `Kéo để sắp xếp ${titles[0]}` });
+  // dnd-kit's keyboard sensor needs a frame between lift, move and drop (as a human would type).
   await handle.focus();
   await page.keyboard.press('Space');
+  await page.waitForTimeout(150);
   await page.keyboard.press('ArrowDown');
+  await page.waitForTimeout(150);
   await page.keyboard.press('Space');
   await expect(rows.nth(0)).toContainText(titles[1]);
   await expect(rows.nth(1)).toContainText(titles[0]);

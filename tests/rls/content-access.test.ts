@@ -1,4 +1,4 @@
-import { beforeAll, describe, expect, it } from 'vitest';
+import { afterAll, beforeAll, describe, expect, it } from 'vitest';
 import { admin, anon, createMember, createTestUser, resetTeam, type TestUser } from './helpers';
 
 describe('content RLS', () => {
@@ -145,6 +145,10 @@ describe('storage bucket pose-images', () => {
     await createMember('seed-admin', 'Admin');
     member = await createMember('uploader', 'Uploader');
     outsider = await createTestUser('storage-outsider');
+  });
+
+  afterAll(async () => {
+    await admin.storage.from('pose-images').remove([path]);
   });
 
   it('is private and lets members upload and sign URLs', async () => {

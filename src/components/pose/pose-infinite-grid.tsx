@@ -10,7 +10,7 @@ import { listPoseCards } from '@/lib/poses/pose-card-query';
 import { useLibraryFilters } from '@/lib/poses/use-library-filters';
 import { createSupabaseBrowserClient } from '@/lib/supabase/browser-client';
 import type { PoseCardData, PoseFilters } from '@/lib/types/pose';
-import { AddToShootSheet } from './add-to-shoot-sheet';
+import { AddToShootSheet } from '@/components/shoot/add-to-shoot-sheet';
 import { PoseCardGrid } from './pose-card-grid';
 
 /** Skeleton cards with different heights so the loading state looks like the masonry. */
@@ -155,7 +155,7 @@ export function PoseInfiniteGrid({
         open={shootSheet}
         onOpenChange={setShootSheet}
         poseIds={[...selected]}
-        onDone={exitSelection}
+        onAdded={exitSelection}
       />
     </>
   );

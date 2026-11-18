@@ -52,16 +52,19 @@ test('reordering images in the edit form changes the cover', async ({ page }) =>
   await expect(tiles(page)).toHaveCount(2);
   const secondId = await tiles(page).nth(1).getAttribute('data-image-id');
   await page.getByRole('button', { name: 'Kéo để đổi thứ tự ảnh 2' }).focus();
+  // dnd-kit's keyboard sensor needs a frame between lift, move and drop (as a human would type).
   await page.keyboard.press('Space');
+  await page.waitForTimeout(150);
   await page.keyboard.press('ArrowLeft');
+  await page.waitForTimeout(150);
   await page.keyboard.press('Space');
-  await expect(tiles(page).first().getByText('Ảnh bìa')).toBeVisible();
+  await expect(tiles(page).first()).toHaveAttribute('data-image-id', secondId!);
   await page.getByRole('button', { name: 'Lưu thay đổi' }).click();
   await expect(page).toHaveURL(new RegExp(`/poses/${id}$`));
 
   await page.goto(`/poses/${id}/edit`);
+  await expect(tiles(page).first()).toHaveAttribute('data-image-id', secondId!);
   await expect(tiles(page).first().getByText('Ảnh bìa')).toBeVisible();
-  expect(await tiles(page).first().getAttribute('data-image-id')).toBe(secondId);
 });
 
 test('cancelling uploads nothing; AI button stays locked without a key', async ({ page }) => {

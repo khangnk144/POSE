@@ -30,7 +30,7 @@ export async function guardAiRequest(): Promise<{ userId: string } | Response> {
 export async function spendQuotaOrResponse(userId: string): Promise<Response | null> {
   try {
     // Cast: `consume_ai_quota` is not in the generated Database types until `npm run db:types`.
-    const admin = createSupabaseAdminClient() as unknown as QuotaRpcClient;
+    const admin: QuotaRpcClient = createSupabaseAdminClient();
     const result = await consumeAiQuota(admin, userId, getDailyLimit());
     return result.allowed ? null : jsonError('ai_quota', 429);
   } catch (e) {

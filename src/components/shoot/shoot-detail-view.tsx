@@ -126,7 +126,7 @@ export function ShootDetailView({ shoot, canDelete }: { shoot: ShootDetail; canD
           }
         />
       ) : (
-        <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={onDragEnd}>
+        <DndContext id="shoot-items-sortable" sensors={sensors} collisionDetection={closestCenter} onDragEnd={onDragEnd}>
           <SortableContext items={items.map((i) => i.poseId)} strategy={verticalListSortingStrategy}>
             <ul className="flex flex-col gap-2" aria-label="Danh sách dáng cần chụp">
               {items.map((item) => (
