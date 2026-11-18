@@ -1,18 +1,32 @@
 import type { PoseDraft } from '@/lib/schemas/pose-draft-schema';
 import type { AutofillImage } from '@/lib/types/pose';
+import { postAi } from './ai-http';
 
 /**
  * Ask the AI to fill pose fields from reference images.
  * Calls `POST /api/ai/autofill` and resolves with only the fields the model returned
  * validly. Must only run in response to a user pressing "AI điền giúp".
  *
- * @param images 1-3 uploaded image ids, or one local file (JPEG, <= 1024px).
- * @throws Error with message `ai_quota` when the daily limit is reached (HTTP 429),
- *         `ai_disabled` when no API key is configured, or a generic error otherwise.
- *
- * Owner: AI phase (replaces this stub). Caller: pose form.
+ * @param images 1-3 uploaded image ids, or local files (JPEG, <= 1024px).
+ * @throws AiClientError whose `message` is `ai_quota` (daily limit, HTTP 429), `ai_disabled`
+ *         (no API key configured), `ai_timeout`, `ai_busy`, `network`, `aborted` or `ai_failed`.
  */
-export async function requestAutofill(images: AutofillImage[]): Promise<Partial<PoseDraft>> {
-  void images;
-  throw new Error('not implemented');
+export async function requestAutofill(images: AutofillImage[], signal?: AbortSignal): Promise<Partial<PoseDraft>> {
+  const ids = images.flatMap((i) => ('imageId' in i ? [i.imageId] : []));
+  const files = images.flatMap((i) => ('file' in i ? [i.file] : []));
+
+  const request =
+    files.length === 0
+      ? { body: JSON.stringify({ imageIds: ids }), headers: { 'content-type': 'application/json' } }
+      : { body: toForm(ids, files) };
+
+  const { draft } = await postAi<{ draft: Partial<PoseDraft> }>('/api/ai/autofill', { ...request, signal });
+  return draft;
+}
+
+function toForm(ids: string[], files: Blob[]): FormData {
+  const form = new FormData();
+  for (const id of ids) form.append('imageIds', id);
+  files.forEach((file, i) => form.append('image', file, `image-${i}.jpg`));
+  return form;
 }
