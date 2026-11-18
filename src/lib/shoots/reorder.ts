@@ -17,12 +17,6 @@ export function toPositions(poseIds: readonly string[]): PositionUpdate[] {
   return poseIds.map((poseId, position) => ({ poseId, position }));
 }
 
-/** Only the rows whose position differs between the old and new order (fewer writes). */
-export function changedPositions(before: readonly string[], after: readonly string[]): PositionUpdate[] {
-  const old = new Map(before.map((id, i) => [id, i]));
-  return toPositions(after).filter((u) => old.get(u.poseId) !== u.position);
-}
-
 /** Next free position when appending to a list whose existing positions are known. */
 export function nextPosition(positions: readonly number[]): number {
   return positions.length === 0 ? 0 : Math.max(...positions) + 1;

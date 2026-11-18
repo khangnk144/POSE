@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { changedPositions, moveItem, newPoseIds, nextPosition, toPositions } from './reorder';
+import { moveItem, newPoseIds, nextPosition, toPositions } from './reorder';
 
 describe('moveItem', () => {
   it('moves forward and backward', () => {
@@ -17,19 +17,24 @@ describe('moveItem', () => {
   });
 });
 
-describe('toPositions / changedPositions', () => {
+describe('toPositions', () => {
   it('numbers contiguously from 0', () => {
     expect(toPositions(['x', 'y'])).toEqual([
       { poseId: 'x', position: 0 },
       { poseId: 'y', position: 1 },
     ]);
   });
-  it('lists only rows whose position changed', () => {
-    expect(changedPositions(['a', 'b', 'c'], ['a', 'c', 'b'])).toEqual([
+  it('renumbers every row after a removal left gaps, so no ties remain', () => {
+    // stored positions after removing "b": a0 c2 d3 e4; UI list is [a, c, d, e]; user drags e above d
+    const order = moveItem(['a', 'c', 'd', 'e'], 3, 2);
+    const positions = toPositions(order);
+    expect(positions).toEqual([
+      { poseId: 'a', position: 0 },
       { poseId: 'c', position: 1 },
-      { poseId: 'b', position: 2 },
+      { poseId: 'e', position: 2 },
+      { poseId: 'd', position: 3 },
     ]);
-    expect(changedPositions(['a', 'b'], ['a', 'b'])).toEqual([]);
+    expect(new Set(positions.map((p) => p.position)).size).toBe(positions.length);
   });
 });
 

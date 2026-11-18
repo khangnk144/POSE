@@ -42,7 +42,7 @@ export function ShootDetailView({ shoot, canDelete }: { shoot: ShootDetail; canD
     const nextItems = moveItem(items, from, to);
     setItems(nextItems);
     try {
-      await saveShootOrder(shoot.id, before, nextItems.map((i) => i.poseId));
+      await saveShootOrder(shoot.id, nextItems.map((i) => i.poseId));
     } catch {
       setItems(items);
       showToast('Chưa lưu được thứ tự, bạn thử lại nha.', { kind: 'error' });

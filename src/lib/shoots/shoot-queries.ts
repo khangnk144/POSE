@@ -2,7 +2,7 @@ import 'server-only';
 import type { SupabaseClient } from '@supabase/supabase-js';
 import type { CameraHeight, Zoom } from '@/lib/types/pose';
 import type { Database } from '@/lib/types/database';
-import { signPaths } from './signed-urls';
+import { signPaths } from '@/lib/poses/signed-urls';
 
 type Client = SupabaseClient<Database>;
 
@@ -72,7 +72,8 @@ export async function getShoot(supabase: Client, id: string): Promise<ShootDetai
       'pose_id, position, done, poses(title, camera_height, zoom, photographer_position, model_steps, pose_images(thumb_path, full_path, position, dominant_color))',
     )
     .eq('shoot_id', id)
-    .order('position');
+    .order('position')
+    .order('pose_id');
   if (itemsError) throw new Error(itemsError.message);
 
   const covers = rows.map((r) => [...(r.poses?.pose_images ?? [])].sort((a, b) => a.position - b.position)[0]);
