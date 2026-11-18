@@ -1,6 +1,6 @@
 step 1-2 done — git init, .gitignore, Next 16.4.6 scaffold at d:\POSE root, base deps installed
 step 3 in progress — npm install of project deps running (check package.json for supabase/vitest)
-step 4a done — migrations 0001-0005 + seed.sql (invite code XINH26 local) written in supabase/; not yet applied (needs Docker + supabase init config.toml)
+step 4a done — migrations 0001-0005 + seed.sql (invite code XINH2026 local) written in supabase/; not yet applied (needs Docker + supabase init config.toml)
 step 5a done — types (src/lib/types/pose.ts, pose-labels.ts), schemas, lib/poses/filters-url.ts, contract stubs, ai-availability.ts, .env.example written; database.ts needs db running
 step 7-8 done — globals.css tokens, layout fonts, ui primitives in src/components/ui (toast, bottom-sheet, ...)
 step 6,9a done — supabase clients (src/lib/supabase/*), src/proxy.ts, session.ts, app shell (src/components/shell/*), (app)/layout.tsx

@@ -1,6 +1,6 @@
 import { expect, test } from '@playwright/test';
 
-const INVITE_CODE = process.env.E2E_INVITE_CODE ?? 'XINH26'; // local seed.sql value
+const INVITE_CODE = process.env.E2E_INVITE_CODE ?? 'XINH2026'; // local seed.sql value
 
 test('import-url requires a session', async ({ request }) => {
   const res = await request.post('/api/import-url', { data: { url: 'https://example.com/a.jpg' } });

@@ -1,6 +1,6 @@
 import { expect, test, type Page } from '@playwright/test';
 
-const INVITE_CODE = process.env.E2E_INVITE_CODE ?? 'XINH26'; // local seed.sql value
+const INVITE_CODE = process.env.E2E_INVITE_CODE ?? 'XINH2026'; // local seed.sql value
 
 // 1x1 PNG; the pipeline never upscales, so this also covers tiny images.
 const PNG = Buffer.from(

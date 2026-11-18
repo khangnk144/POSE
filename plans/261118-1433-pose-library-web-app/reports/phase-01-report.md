@@ -25,7 +25,7 @@
 ```
 npm run db:start          # first run pulls images
 npm run db:status         # copy ANON_KEY and SERVICE_ROLE_KEY into .env.local
-npm run db:reset          # applies 0001-0005 + seed.sql (local invite code XINH26)
+npm run db:reset          # applies 0001-0005 + seed.sql (local invite code XINH2026)
 npm run db:types          # replaces the hand-written src/lib/types/database.ts
 npm run test:rls
 npm run test:e2e          # writes reports/phase-01-shell.png
@@ -59,7 +59,7 @@ Non-member and anon read 0 poses; non-member cannot insert; member A cannot dele
 8. **Realtime publication** now includes `poses` and `shoot_items` (migration 0004) for the "new poses" pill and shoot sync.
 9. **Env var name** stays `NEXT_PUBLIC_SUPABASE_ANON_KEY` as briefed (Supabase docs now call it a "publishable key"; legacy anon key still works locally).
 10. **Template tweaks**: removed `cacheComponents` and `partialPrefetching` from the generated `next.config.ts` (they force Suspense around all cookie access; not in the plan). `@types/node` bumped to ^24 because vitest 5.1.1 peer requires `^22 || >=24`.
-11. Local invite code: migration inserts a random code; `seed.sql` sets `XINH26` for local dev only. Production: set it with SQL (`update team_settings set invite_code = '...'`). No rate limit on `join_team` code guessing (out of scope, flag for phase 7).
+11. Local invite code: migration inserts a random code; `seed.sql` sets `XINH2026` for local dev only. Production: set it with SQL (`update team_settings set invite_code = '...'`). No rate limit on `join_team` code guessing (out of scope, flag for phase 7).
 
 ## What later phases must know
 - **Supabase clients**: browser `createSupabaseBrowserClient()`; server `await createSupabaseServerClient()` (user session, RLS applies); admin `createSupabaseAdminClient()` (service role, bypasses RLS, `server-only`, check membership first).

@@ -1,7 +1,7 @@
 import path from 'node:path';
 import { expect, test } from '@playwright/test';
 
-const INVITE_CODE = process.env.E2E_INVITE_CODE ?? 'XINH26'; // local seed.sql value
+const INVITE_CODE = process.env.E2E_INVITE_CODE ?? 'XINH2026'; // local seed.sql value
 const SCREENSHOT = path.resolve(
   __dirname,
   '../../plans/261118-1433-pose-library-web-app/reports/phase-04-suggest-locked.png',

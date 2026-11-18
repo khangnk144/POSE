@@ -6,7 +6,7 @@ import type { Database } from '../../src/lib/types/database';
 
 config({ path: '.env.local', quiet: true });
 
-const INVITE_CODE = process.env.E2E_INVITE_CODE ?? 'XINH26'; // local seed.sql value
+const INVITE_CODE = process.env.E2E_INVITE_CODE ?? 'XINH2026'; // local seed.sql value
 
 /** Service-role client for seeding and inspecting data (bypasses RLS). */
 export function adminClient() {
