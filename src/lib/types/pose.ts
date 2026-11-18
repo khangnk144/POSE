@@ -51,6 +51,7 @@ export type PoseGrid = { x: number; y: number; horizon: 'lower' | null };
 export type PoseCardData = {
   id: string;
   title: string;
+  status: PoseStatus;
   /** Short-lived signed URL of the cover thumbnail; null when the pose has no image. */
   thumbUrl: string | null;
   imageCount: number;
@@ -59,6 +60,7 @@ export type PoseCardData = {
   photographerPosition: string | null;
   /** First steps of model_steps, at most 2. */
   modelStepsPreview: string[];
+  modelStepCount: number;
   isFavorite: boolean;
   /** Placeholder colour (#rrggbb) while the image loads. */
   dominantColor: string | null;
@@ -76,6 +78,8 @@ export type PoseFilters = {
   placeId?: string;
   createdBy?: string;
   favoritesOnly?: boolean;
+  /** Published poses missing the camera height or the model steps ("Cần bổ sung"). */
+  needsDetails?: boolean;
   status?: PoseStatus;
 };
 

@@ -28,6 +28,17 @@ export function GridSkeleton() {
 function LibraryEmpty({ filters }: { filters: PoseFilters }) {
   const { apply } = useLibraryFilters();
   const refined = Boolean(filters.q) || countActiveFilters({ ...filters, status: undefined }) > 0;
+  const onlyNeedsDetails = !filters.q && filters.needsDetails && countActiveFilters({ ...filters, status: undefined }) === 1;
+  if (onlyNeedsDetails) {
+    return (
+      <EmptyState
+        illustration="🎉"
+        title="Dáng nào cũng đủ thông số rồi 🎉"
+        description="Không còn dáng nào cần bổ sung."
+        action={<Button onClick={() => apply({ status: filters.status })}>Xoá bộ lọc</Button>}
+      />
+    );
+  }
   if (refined) {
     return (
       <EmptyState

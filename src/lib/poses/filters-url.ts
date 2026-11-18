@@ -35,7 +35,7 @@ function readParam(source: ParamSource, key: string): string | undefined {
  * Parse URL search params into validated filters. Unknown keys and invalid values
  * are dropped one by one so a stale or hand-edited link never throws.
  * Query keys: q, people, posture, scenes, height, tilt, zoom, orientation (comma lists),
- * place, by, fav=1, status.
+ * place, by, fav=1, need=1, status.
  */
 export function parseFilters(source: ParamSource): PoseFilters {
   const raw: Record<string, unknown> = {};
@@ -49,6 +49,8 @@ export function parseFilters(source: ParamSource): PoseFilters {
   const status = readParam(source, 'status');
   if (status && (POSE_STATUSES as readonly string[]).includes(status)) raw.status = status;
   if (readParam(source, 'fav') === '1') raw.favoritesOnly = true;
+  if (readParam(source, 'need') === '1') raw.needsDetails = true;
+  if (readParam(source, 'need') === '1') raw.needsDetails = true;
 
   for (const [field, allowed] of Object.entries(LIST_FIELDS)) {
     const value = readParam(source, field);
@@ -79,6 +81,8 @@ export function serializeFilters(filters: PoseFilters): URLSearchParams {
   if (filters.placeId) params.set('place', filters.placeId);
   if (filters.createdBy) params.set('by', filters.createdBy);
   if (filters.favoritesOnly) params.set('fav', '1');
+  if (filters.needsDetails) params.set('need', '1');
+  if (filters.needsDetails) params.set('need', '1');
   if (filters.status) params.set('status', filters.status);
   return params;
 }

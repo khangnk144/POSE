@@ -35,12 +35,23 @@ export function decodeCursor(raw: string | null | undefined): PoseCursor | null 
 }
 
 /**
+ * Same rule as `isMissingSpecs` (missing-specs.ts): no camera height or no model steps.
+ * `model_steps` is `text[] not null default '{}'`, so "no steps" is the empty array.
+ */
+export const NEEDS_DETAILS_CONDITION: PoseCondition = {
+  op: 'or',
+  expression: 'camera_height.is.null,model_steps.eq.{}',
+};
+
+/**
  * Translate filters (+ optional cursor) into conditions. Published poses only unless
  * `status` says otherwise. Favorites are not a condition: they need an inner join, see
  * `poseCardSelect`.
  */
 export function buildPoseConditions(filters: PoseFilters, cursor?: PoseCursor | null): PoseCondition[] {
-  const conditions: PoseCondition[] = [{ op: 'eq', column: 'status', value: filters.status ?? 'published' }];
+  // "Cần bổ sung" is about published poses only (drafts never carry the missing-specs label).
+  const status = filters.needsDetails ? 'published' : (filters.status ?? 'published');
+  const conditions: PoseCondition[] = [{ op: 'eq', column: 'status', value: status }];
 
   for (const token of searchTokens(filters.q)) {
     conditions.push({ op: 'ilike', column: 'search_text', pattern: `%${escapeLikePattern(token)}%` });
@@ -58,6 +69,7 @@ export function buildPoseConditions(filters: PoseFilters, cursor?: PoseCursor | 
     if (values?.length) conditions.push({ op: 'in', column, values: [...values] });
   }
   if (filters.scenes?.length) conditions.push({ op: 'overlaps', column: 'scenes', values: [...filters.scenes] });
+  if (filters.needsDetails) conditions.push(NEEDS_DETAILS_CONDITION);
   if (filters.placeId) conditions.push({ op: 'eq', column: 'place_id', value: filters.placeId });
   if (filters.createdBy) conditions.push({ op: 'eq', column: 'created_by', value: filters.createdBy });
 
@@ -100,7 +112,7 @@ export function applyPoseConditions<Q>(query: Q, conditions: PoseCondition[]): Q
 export function poseCardSelect(filters: PoseFilters): string {
   const fav = filters.favoritesOnly ? 'fav:favorites!inner(user_id)' : 'fav:favorites(user_id)';
   return (
-    'id,title,camera_height,zoom,photographer_position,model_steps,created_at,' +
+    'id,title,status,camera_height,zoom,photographer_position,model_steps,created_at,' +
     `pose_images(thumb_path,position,dominant_color),${fav}`
   );
 }

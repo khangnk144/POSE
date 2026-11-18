@@ -24,5 +24,6 @@ export const poseFiltersSchema = z.object({
   placeId: z.string().uuid().optional(),
   createdBy: z.string().uuid().optional(),
   favoritesOnly: z.boolean().optional(),
+  needsDetails: z.boolean().optional(),
   status: z.enum(POSE_STATUSES).optional(),
 });

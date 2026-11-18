@@ -1,6 +1,6 @@
 import type { SupabaseClient } from '@supabase/supabase-js';
 import type { Database } from '@/lib/types/database';
-import type { CameraHeight, PoseCardData, PoseFilters, Zoom } from '@/lib/types/pose';
+import type { CameraHeight, PoseCardData, PoseFilters, PoseStatus, Zoom } from '@/lib/types/pose';
 import {
   applyPoseConditions,
   buildPoseConditions,
@@ -16,6 +16,7 @@ export type PoseCardPage = { items: PoseCardData[]; nextCursor: string | null };
 type CardRow = {
   id: string;
   title: string;
+  status: string;
   camera_height: string | null;
   zoom: string | null;
   photographer_position: string | null;
@@ -36,12 +37,14 @@ async function toCards(supabase: SupabaseClient<Database>, rows: CardRow[]): Pro
     return {
       id: row.id,
       title: row.title,
+      status: row.status as PoseStatus,
       thumbUrl: cover ? (urls.get(cover.thumb_path) ?? null) : null,
       imageCount: row.pose_images?.length ?? 0,
       cameraHeight: row.camera_height as CameraHeight | null,
       zoom: row.zoom as Zoom | null,
       photographerPosition: row.photographer_position,
       modelStepsPreview: (row.model_steps ?? []).slice(0, 2),
+      modelStepCount: row.model_steps?.length ?? 0,
       isFavorite: (row.fav?.length ?? 0) > 0,
       dominantColor: cover?.dominant_color ?? null,
     };

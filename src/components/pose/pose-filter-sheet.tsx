@@ -9,6 +9,7 @@ import { createSupabaseBrowserClient } from '@/lib/supabase/browser-client';
 import { countPoses } from '@/lib/poses/pose-card-query';
 import type { PoseFilters } from '@/lib/types/pose';
 import { ChipGroup, EnumFilterGroups } from './pose-filter-groups';
+import { FilterSwitch } from './pose-filter-switch';
 
 type Option = { id: string; label: string };
 type Options = { places: Option[]; people: Option[] } | 'loading' | 'error';
@@ -119,21 +120,17 @@ export function PoseFilterSheet({
       }
     >
       <div className="flex flex-col gap-4">
-        <button
-          type="button"
-          role="switch"
-          aria-checked={draft.favoritesOnly ?? false}
-          onClick={() => setDraft({ ...draft, favoritesOnly: draft.favoritesOnly ? undefined : true })}
-          className="flex min-h-11 items-center justify-between rounded-md bg-surface-2 px-3.5 text-left text-[15px] font-semibold"
-        >
-          Chỉ dáng yêu thích
-          <span
-            aria-hidden
-            className={`flex h-6 w-11 items-center rounded-full p-0.5 transition-colors ${draft.favoritesOnly ? 'bg-primary' : 'bg-border-strong'}`}
-          >
-            <span className={`size-5 rounded-full bg-white transition-transform ${draft.favoritesOnly ? 'translate-x-5' : ''}`} />
-          </span>
-        </button>
+        <FilterSwitch
+          title="Chỉ dáng yêu thích"
+          checked={draft.favoritesOnly ?? false}
+          onChange={(on) => setDraft({ ...draft, favoritesOnly: on ? true : undefined })}
+        />
+        <FilterSwitch
+          title="Cần bổ sung"
+          description="Dáng chưa có cách cầm máy hoặc các bước tạo dáng"
+          checked={draft.needsDetails ?? false}
+          onChange={(on) => setDraft({ ...draft, needsDetails: on ? true : undefined })}
+        />
 
         <EnumFilterGroups value={draft} onChange={setDraft} />
 

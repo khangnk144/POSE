@@ -2,9 +2,10 @@
 
 import Link from 'next/link';
 import { useRef, useState } from 'react';
-import { Check, ImageOff } from 'lucide-react';
+import { Check, ImageOff, Pencil } from 'lucide-react';
 import { CameraChip } from '@/components/ui/chip';
 import { CAMERA_HEIGHT_LABELS } from '@/lib/types/pose-labels';
+import { isMissingSpecs } from '@/lib/poses/missing-specs';
 import type { PoseCardData } from '@/lib/types/pose';
 import { cn } from '@/lib/utils/cn';
 import { PoseHeartButton } from './pose-heart-button';
@@ -67,6 +68,11 @@ export function PoseCard({ pose, selectable = false, selected = false, onSelecte
     pose.zoom ? (
       <CameraChip key="z" tone="zoom">
         {pose.zoom}
+      </CameraChip>
+    ) : null,
+    isMissingSpecs({ status: pose.status, cameraHeight: pose.cameraHeight, stepCount: pose.modelStepCount }) ? (
+      <CameraChip key="todo" tone="todo" icon={<Pencil className="size-3" aria-hidden />}>
+        Thiếu thông số
       </CameraChip>
     ) : null,
   ].filter(Boolean);

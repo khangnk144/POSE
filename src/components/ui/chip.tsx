@@ -1,7 +1,7 @@
 import { Check } from 'lucide-react';
 import { cn } from '@/lib/utils/cn';
 
-/** Read-only camera spec chip (e.g. "Ngang hông", "1x"). `tone="zoom"` highlights zoom values. */
+/** Read-only camera spec chip (e.g. "Ngang hông", "1x"). `tone="zoom"` highlights zoom values; `"todo"` is the dashed "Thiếu thông số" reminder. */
 export function CameraChip({
   children,
   icon,
@@ -9,13 +9,16 @@ export function CameraChip({
 }: {
   children: React.ReactNode;
   icon?: React.ReactNode;
-  tone?: 'neutral' | 'zoom';
+  tone?: 'neutral' | 'zoom' | 'todo';
 }) {
   return (
     <span
       className={cn(
         'inline-flex h-[26px] items-center gap-1 rounded-full px-2 text-[13px] font-medium',
-        tone === 'zoom' ? 'bg-info-soft text-info' : 'bg-surface-3 text-text',
+        tone === 'zoom' && 'bg-info-soft text-info',
+        tone === 'neutral' && 'bg-surface-3 text-text',
+        // Gentle reminder, not an error: dashed outline, no danger colour.
+        tone === 'todo' && 'border border-dashed border-border-strong text-text-2',
       )}
     >
       {icon}

@@ -18,10 +18,18 @@ describe('filters-url', () => {
       placeId: UUID,
       createdBy: UUID,
       favoritesOnly: true,
+      needsDetails: true,
       status: 'draft',
     };
     const params = serializeFilters(filters);
     expect(parseFilters(new URLSearchParams(params.toString()))).toEqual(filters);
+  });
+
+  it('reads and writes need=1 for "Cần bổ sung"', () => {
+    expect(serializeFilters({ needsDetails: true }).toString()).toBe('need=1');
+    expect(parseFilters(new URLSearchParams('need=1'))).toEqual({ needsDetails: true });
+    expect(parseFilters(new URLSearchParams('need=0'))).toEqual({});
+    expect(countActiveFilters({ needsDetails: true })).toBe(1);
   });
 
   it('round-trips empty filters to empty params', () => {

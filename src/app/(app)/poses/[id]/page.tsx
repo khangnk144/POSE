@@ -5,14 +5,16 @@ import { Avatar } from '@/components/ui/avatar';
 import { EmptyState } from '@/components/ui/empty-state';
 import { PoseDetailBottomBar, PoseDetailTopBar } from '@/components/pose/pose-detail-actions';
 import { PoseImageCarousel, type CarouselImage } from '@/components/pose/pose-image-carousel';
+import { inviteSlots, PoseMissingSpecsInvite } from '@/components/pose/pose-missing-specs-invite';
 import { PoseSpecCard } from '@/components/pose/pose-spec-card';
 import { PoseStepList } from '@/components/pose/pose-step-list';
 import { parsePoseGrid } from '@/lib/poses/grid-position';
+import { isMissingSpecs, specGaps } from '@/lib/poses/missing-specs';
 import { relativeTimeVi } from '@/lib/poses/relative-time';
 import { signPaths } from '@/lib/poses/signed-urls';
 import { createSupabaseServerClient } from '@/lib/supabase/server-client';
 import { requireMember } from '@/lib/supabase/session';
-import type { CameraHeight, CameraTilt, Orientation, Zoom } from '@/lib/types/pose';
+import type { CameraHeight, CameraTilt, Orientation, PoseStatus, Zoom } from '@/lib/types/pose';
 import { sceneLabel } from '@/lib/types/pose-labels';
 
 export const metadata: Metadata = { title: 'Chi tiết dáng' };
@@ -82,6 +84,8 @@ export default async function PoseDetailPage({ params }: { params: Promise<{ id:
   const storagePaths = images.flatMap((image) => [image.full_path, image.thumb_path]);
   const isFavorite = pose.fav.length > 0;
   const sourceHost = pose.source_url ? hostOf(pose.source_url) : null;
+  const missingSpecs = { status: pose.status as PoseStatus, cameraHeight: pose.camera_height, stepCount: pose.model_steps.length };
+  const invites = isMissingSpecs(missingSpecs) ? inviteSlots(specGaps(missingSpecs)) : { atSpec: null, atSteps: null };
 
   return (
     <div className="-mx-4 -mt-4 md:mx-auto md:mt-0 md:max-w-[640px] lg:grid lg:max-w-none lg:grid-cols-2 lg:gap-8">
@@ -120,7 +124,9 @@ export default async function PoseDetailPage({ params }: { params: Promise<{ id:
           distanceM={pose.distance_m}
           grid={parsePoseGrid(pose.grid)}
         />
+        {invites.atSpec ? <PoseMissingSpecsInvite poseId={pose.id} kind={invites.atSpec} /> : null}
         <PoseStepList steps={pose.model_steps} />
+        {invites.atSteps ? <PoseMissingSpecsInvite poseId={pose.id} kind={invites.atSteps} /> : null}
 
         {pose.tips ? (
           <section aria-labelledby="tips-title" className="rounded-md bg-surface-2 p-4">
