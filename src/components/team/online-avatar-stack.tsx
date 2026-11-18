@@ -24,7 +24,9 @@ export function OnlineAvatarStack() {
     function join() {
       if (channel || !me || disposed || document.visibilityState !== 'visible') return;
       const self = me;
-      const ch = supabase.channel(PRESENCE_CHANNEL, { config: { presence: { key: self.id, enabled: true } } });
+      const ch = supabase.channel(PRESENCE_CHANNEL, {
+        config: { private: true, presence: { key: self.id, enabled: true } },
+      });
       ch.on('presence', { event: 'sync' }, () => setUsers(listOnlineUsers(ch.presenceState(), self.id)));
       ch.subscribe((status) => {
         if (status === 'SUBSCRIBED') void ch.track(self);
