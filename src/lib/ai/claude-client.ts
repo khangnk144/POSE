@@ -56,7 +56,7 @@ function mapSdkError(e: unknown): AiCallError {
 /** One Claude call that must answer through `tool` (forced tool use => structured JSON input). */
 export async function callClaudeTool(call: ClaudeToolCall): Promise<{ input: unknown; usage: ClaudeUsage }> {
   // Created per call so a key added to the environment is picked up without a rebuild.
-  const client = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY, maxRetries: 1 });
+  const client = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY, maxRetries: 0 });
   try {
     const message = await client.messages.create(
       {

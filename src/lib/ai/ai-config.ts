@@ -14,5 +14,8 @@ export function getDailyLimit(): number {
   return Number.isFinite(n) && n > 0 ? n : DEFAULT_DAILY_LIMIT;
 }
 
-/** Hard ceiling for one Claude call; the UI also promises an error after 30s. */
+/**
+ * Hard ceiling for one Claude call; the UI also promises an error after 30s. The client does not
+ * retry (maxRetries: 0), so one call is the whole budget and stays below the routes' maxDuration (60s).
+ */
 export const CLAUDE_TIMEOUT_MS = 40_000;
