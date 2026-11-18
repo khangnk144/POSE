@@ -3,12 +3,12 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import type { PoseDraft } from '@/lib/schemas/pose-draft-schema';
 import type { FieldKey, FormValues } from './form-values';
-import { initialLockedFields, mergeAiDraft } from './merge-ai-draft';
+import { initialLockedFields, mergeAiDraft, recordEdit } from './merge-ai-draft';
 
 const FLASH_MS = 1600;
 
 /**
- * Form values plus dirty tracking. `set` marks a field as touched; `applyAi` merges an AI
+ * Form values plus dirty tracking. `set` marks a field as touched (choosing "Không rõ" un-touches it); `applyAi` merges an AI
  * answer into untouched fields only and flashes the ones it filled.
  */
 export function usePoseFormState(initial: FormValues) {
@@ -25,7 +25,7 @@ export function usePoseFormState(initial: FormValues) {
   useEffect(() => () => { if (flashTimer.current) clearTimeout(flashTimer.current); }, []);
 
   const set = useCallback(<K extends FieldKey>(key: K, value: FormValues[K]) => {
-    locked.current.add(key);
+    recordEdit(locked.current, key, value);
     setTouchedAny(true);
     setValues((v) => ({ ...v, [key]: value }));
   }, []);

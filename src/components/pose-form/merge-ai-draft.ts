@@ -28,6 +28,15 @@ export function initialLockedFields(values: FormValues): Set<FieldKey> {
   return locked;
 }
 
+/**
+ * Records a user edit. Touched fields are locked against AI, except when the user picks
+ * "Không rõ" (value undefined): the field is empty again, so AI may fill it.
+ */
+export function recordEdit(locked: Set<FieldKey>, key: FieldKey, value: unknown): void {
+  if (value === undefined) locked.delete(key);
+  else locked.add(key);
+}
+
 function dedupe(list: string[]): string[] {
   const seen = new Set<string>();
   return list.filter((s) => {

@@ -86,6 +86,9 @@ export function StepsEditor({ steps, onChange }: { steps: string[]; onChange: (s
   return (
     <div className="flex flex-col gap-2">
       <span className="text-[13px] font-medium text-text">Các bước tạo dáng</span>
+      {steps.length === 0 ? (
+        <p className="text-sm text-text-2">Chưa có bước nào. Viết vài bước ngắn kiểu “Nghiêng vai”, “Nhìn xuống”.</p>
+      ) : null}
       <DndContext id="steps-sortable" sensors={sensors} collisionDetection={closestCenter} onDragEnd={onDragEnd}>
         <SortableContext items={steps.map((_, i) => idOf(i))} strategy={verticalListSortingStrategy}>
           <ol className="flex flex-col gap-2">
@@ -105,6 +108,7 @@ export function StepsEditor({ steps, onChange }: { steps: string[]; onChange: (s
         <button
           type="button"
           onClick={() => onChange([...steps, ''])}
+          data-add-step
           className="inline-flex min-h-11 items-center gap-1.5 self-start font-semibold text-primary"
         >
           <Plus className="size-5" aria-hidden />

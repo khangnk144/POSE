@@ -5,16 +5,19 @@ import { FeatureLockedHint } from '@/components/ui/feature-locked-hint';
 
 /**
  * "AI điền giúp". Enabled only when AI is configured, there is at least one image and no
- * request is running. When AI is not configured the locked hint is always shown below.
+ * request is running. When AI is not configured the locked hint is always shown below, in place
+ * of the usual explanation.
  */
 export function AiFillButton({
   aiEnabled,
   hasImages,
+  hasCaption,
   running,
   onClick,
 }: {
   aiEnabled: boolean;
   hasImages: boolean;
+  hasCaption: boolean;
   running: boolean;
   onClick: () => void;
 }) {
@@ -25,7 +28,7 @@ export function AiFillButton({
         variant="ai"
         disabled={disabled}
         loading={running}
-        loadingLabel="AI đang xem ảnh…"
+        loadingLabel={hasCaption ? 'Đang xem ảnh và đọc ghi chú…' : 'Đang ngắm ảnh…'}
         onClick={onClick}
         className="self-start"
       >
@@ -35,7 +38,11 @@ export function AiFillButton({
         <FeatureLockedHint />
       ) : !hasImages ? (
         <p className="text-xs text-text-2">Thêm ít nhất 1 ảnh để AI điền giúp nhé.</p>
-      ) : null}
+      ) : (
+        <p className="text-xs text-text-2">
+          AI xem ảnh và đọc ghi chú ở trên rồi điền các ô còn trống. Mỗi lần bấm tính 1 lượt.
+        </p>
+      )}
     </div>
   );
 }

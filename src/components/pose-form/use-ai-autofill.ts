@@ -30,9 +30,15 @@ async function toAutofillImages(images: FormImage[]): Promise<AutofillImage[]> {
 
 /**
  * "AI điền giúp": calls the API only when `run` is invoked by a button press, never
- * automatically. A second press while running is ignored.
+ * automatically. A second press while running is ignored. The caption box text (if any) is sent
+ * along as data; one press is one quota unit. `onFilled` gets the keys the AI filled.
  */
-export function useAiAutofill(images: FormImage[], applyAi: (ai: Partial<PoseDraft>) => FieldKey[]) {
+export function useAiAutofill(
+  images: FormImage[],
+  caption: string,
+  applyAi: (ai: Partial<PoseDraft>) => FieldKey[],
+  onFilled: (filled: FieldKey[]) => void,
+) {
   const showToast = useToast();
   const [running, setRunning] = useState(false);
   const busy = useRef(false);
@@ -42,16 +48,21 @@ export function useAiAutofill(images: FormImage[], applyAi: (ai: Partial<PoseDra
     busy.current = true;
     setRunning(true);
     try {
-      const ai = await requestAutofill(await toAutofillImages(images));
+      const ai = await requestAutofill(await toAutofillImages(images), caption.trim() || undefined);
       const filled = applyAi(ai);
-      showToast(filled.length > 0 ? `AI đã điền ${filled.length} mục, bạn xem lại nhé ✨` : 'AI không có gì mới để điền');
+      onFilled(filled);
+      showToast(
+        filled.length > 0
+          ? `AI đã điền ${filled.length} mục, bạn xem lại nhé ✨`
+          : 'AI chưa nhìn ra thêm gì. Bạn điền tay hoặc để sau nhé.',
+      );
     } catch (err) {
       showToast(messageFor(err), { kind: 'error' });
     } finally {
       busy.current = false;
       setRunning(false);
     }
-  }, [applyAi, images, showToast]);
+  }, [applyAi, caption, images, onFilled, showToast]);
 
   return { running, run };
 }

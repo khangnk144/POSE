@@ -47,6 +47,26 @@ export const EMPTY_VALUES: FormValues = {
   sourceCredit: '',
 };
 
+/** Fields inside "Thêm chi tiết": everything except title, caption (description) and status. */
+export const DETAIL_KEYS = [
+  'peopleCount',
+  'posture',
+  'scenes',
+  'tags',
+  'cameraHeight',
+  'cameraTilt',
+  'zoom',
+  'orientation',
+  'photographerPosition',
+  'distanceM',
+  'grid',
+  'modelSteps',
+  'tips',
+  'placeId',
+  'sourceUrl',
+  'sourceCredit',
+] as const satisfies readonly FieldKey[];
+
 /** Whether a field currently holds something the user (or the saved pose) put there. */
 export function hasValue(values: FormValues, key: FieldKey): boolean {
   const v = values[key];
@@ -54,6 +74,11 @@ export function hasValue(values: FormValues, key: FieldKey): boolean {
   if (Array.isArray(v)) return v.length > 0;
   if (typeof v === 'string') return v.trim() !== '';
   return v !== undefined;
+}
+
+/** How many detail fields hold a value. */
+export function countDetailValues(values: FormValues): number {
+  return DETAIL_KEYS.filter((key) => hasValue(values, key)).length;
 }
 
 /** Converts form state to the shape `poseDraftSchema` expects: empty strings become absent. */

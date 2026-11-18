@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import { poseDraftSchema } from '@/lib/schemas/pose-draft-schema';
 import { EMPTY_VALUES, type FieldKey, type FormValues, toDraftInput } from './form-values';
-import { initialLockedFields, mergeAiDraft } from './merge-ai-draft';
+import { initialLockedFields, mergeAiDraft, recordEdit } from './merge-ai-draft';
 
 const none = new Set<FieldKey>();
 
@@ -90,6 +90,38 @@ describe('mergeAiDraft', () => {
     const before = structuredClone(EMPTY_VALUES);
     mergeAiDraft(EMPTY_VALUES, { title: 'x' }, none);
     expect(EMPTY_VALUES).toEqual(before);
+  });
+});
+
+describe('recordEdit ("Không rõ" unlocks the field)', () => {
+  it('locks a field the user set to a value', () => {
+    const locked = new Set<FieldKey>();
+    recordEdit(locked, 'cameraHeight', 'waist');
+    expect(locked.has('cameraHeight')).toBe(true);
+    expect(mergeAiDraft({ ...EMPTY_VALUES, cameraHeight: 'waist' }, { cameraHeight: 'eye' }, locked).filled).toEqual([]);
+  });
+
+  it('unlocks a field when the user picks "Không rõ" (undefined), so AI may fill it', () => {
+    const locked = new Set<FieldKey>();
+    recordEdit(locked, 'cameraHeight', 'waist');
+    recordEdit(locked, 'cameraHeight', undefined);
+    expect(locked.has('cameraHeight')).toBe(false);
+    const { values, filled } = mergeAiDraft(EMPTY_VALUES, { cameraHeight: 'eye' }, locked);
+    expect(values.cameraHeight).toBe('eye');
+    expect(filled).toEqual(['cameraHeight']);
+  });
+
+  it('unlocks a pose field that came with the saved pose', () => {
+    const saved: FormValues = { ...EMPTY_VALUES, title: 'Có sẵn', zoom: '2x' };
+    const locked = initialLockedFields(saved);
+    recordEdit(locked, 'zoom', undefined);
+    expect([...locked]).toEqual(['title']);
+  });
+
+  it('keeps a cleared text field locked (user touched it)', () => {
+    const locked = new Set<FieldKey>();
+    recordEdit(locked, 'description', '');
+    expect(locked.has('description')).toBe(true);
   });
 });
 

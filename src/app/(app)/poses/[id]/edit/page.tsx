@@ -7,8 +7,20 @@ import { isAiConfigured } from '@/lib/ai/ai-availability';
 
 export const metadata: Metadata = { title: 'Sửa dáng' };
 
-export default async function EditPosePage({ params }: { params: Promise<{ id: string }> }) {
-  const { id } = await params;
+/** `?focus=camera|steps` opens the details on that section; anything else is ignored. */
+function parseFocus(value: string | string[] | undefined): 'camera' | 'steps' | undefined {
+  const v = Array.isArray(value) ? value[0] : value;
+  return v === 'camera' || v === 'steps' ? v : undefined;
+}
+
+export default async function EditPosePage({
+  params,
+  searchParams,
+}: {
+  params: Promise<{ id: string }>;
+  searchParams: Promise<{ focus?: string | string[] }>;
+}) {
+  const [{ id }, { focus }] = await Promise.all([params, searchParams]);
   if (!z.string().uuid().safeParse(id).success) notFound();
 
   const [pose, tagSuggestions] = await Promise.all([fetchPoseForEdit(id), fetchTagSuggestions()]);
@@ -20,6 +32,7 @@ export default async function EditPosePage({ params }: { params: Promise<{ id: s
       poseId={id}
       initialValues={pose.values}
       initialImages={pose.images}
+      focus={parseFocus(focus)}
       aiEnabled={isAiConfigured()}
       tagSuggestions={tagSuggestions}
     />
