@@ -1,6 +1,6 @@
 import 'server-only';
 import type { SupabaseClient } from '@supabase/supabase-js';
-import { signPaths } from '@/lib/shoots/signed-urls';
+import { signPaths } from '@/lib/poses/signed-urls';
 import type { Database } from '@/lib/types/database';
 
 export type PlaceListItem = {
