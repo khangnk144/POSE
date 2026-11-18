@@ -1,8 +1,11 @@
 import type { Metadata } from 'next';
+import { PoseForm } from '@/components/pose-form/pose-form';
+import { fetchTagSuggestions } from '@/components/pose-form/fetch-form-data';
+import { isAiConfigured } from '@/lib/ai/ai-availability';
 
 export const metadata: Metadata = { title: 'Thêm dáng' };
 
-/** Placeholder: the owning phase replaces this page. */
-export default function NewPosePage() {
-  return <h1 className="font-display text-[22px] font-bold leading-[30px]">Thêm dáng</h1>;
+export default async function NewPosePage() {
+  const tagSuggestions = await fetchTagSuggestions();
+  return <PoseForm mode="create" aiEnabled={isAiConfigured()} tagSuggestions={tagSuggestions} />;
 }
