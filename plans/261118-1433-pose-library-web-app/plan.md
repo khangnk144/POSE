@@ -21,14 +21,15 @@ Web app mobile-first, riêng tư cho team. Mỗi "dáng" gồm 1–5 ảnh mẫu
 | # | Phase | Ai làm | Song song? | Trạng thái |
 |---|---|---|---|---|
 | 1 | [Foundation](phase-01-foundation.md): scaffold, tokens, DB/RLS, auth, app shell, contracts | 1 agent (hoặc mình) | ❌ chặn mọi phase sau | ✅ 2026-11-18 (build/lint/typecheck, 19 unit + 22 RLS + 2 e2e pass) |
-| 2 | [Thư viện + bộ lọc + chi tiết](phase-02-library-filter-detail.md) | agent A | ✅ | ⬜ |
-| 3 | [Form dáng + pipeline ảnh + import URL](phase-03-pose-form-image-pipeline.md) | agent B | ✅ | ⬜ |
-| 4 | [AI: điền giúp + gợi ý dáng](phase-04-ai-features.md) | agent C | ✅ | ⬜ |
-| 5 | [Buổi chụp, địa điểm, team, presence](phase-05-shoots-places-team.md) | agent D | ✅ | ⬜ |
-| 6 | [Tích hợp + seed data](phase-06-integration-seed.md) | mình | ❌ sau 2–5 | ⬜ |
-| 7 | [Test + review + deploy](phase-07-test-review-deploy.md) | tester + code-reviewer song song, rồi fix | ❌ | ⬜ |
+| 2 | [Thư viện + bộ lọc + chi tiết](phase-02-library-filter-detail.md) | agent A | ✅ | ✅ 2026-11-18 |
+| 3 | [Form dáng + pipeline ảnh + import URL](phase-03-pose-form-image-pipeline.md) | agent B | ✅ | ✅ 2026-11-18 |
+| 4 | [AI: điền giúp + gợi ý dáng](phase-04-ai-features.md) | agent C | ✅ | ✅ 2026-11-18 |
+| 5 | [Buổi chụp, địa điểm, team, presence](phase-05-shoots-places-team.md) | agent D | ✅ | ✅ 2026-11-18 |
+| 6 | [Tích hợp + seed data](phase-06-integration-seed.md) | mình | ❌ sau 2–5 | 🟡 tích hợp ✅ (231 unit · 26 RLS · 20 e2e x2 pass); seed Pexels chờ API key |
+| 8 | [Thêm dáng dễ dùng cho người không rành máy](phase-08-easy-upload-ux.md) | Fable thiết kế, 1 agent code | ❌ sau khi sửa xong review | ⬜ |
+| 7 | [Test + review + deploy](phase-07-test-review-deploy.md) | tester + code-reviewer song song, rồi fix | ❌ | 🟡 review đang chạy; deploy chờ tài khoản |
 
-**Điểm dừng 2026-11-18 (làm tiếp từ đây):** Phase 1 mới xong các bước 1–2 (đã `git init` + `.gitignore`, khung Next 16.4.6 + Tailwind 4.3.3 đã chuyển ra thư mục gốc, đã cài package nền, chưa commit). Thư mục `supabase/` mới tạo, còn trống. **Làm tiếp từ bước 3** trong phase-01 (cài Supabase, zod, …), sau đó tới migrations. Agent bị ngắt 2 lần do lỗi mạng tới API (ENOTFOUND/ECONNREFUSED), không phải lỗi code. Yêu cầu mới phải làm trong Phase 1: `src/lib/ai/ai-availability.ts` và `src/components/ui/feature-locked-hint.tsx` (khoá AI khi chưa có key, xem contracts). Khi Phase 1 xong thì gửi link local cho người dùng xem giao diện.
+**Trạng thái 2026-11-18 tối:** Phase 1–5 xong và đã gộp vào `main` (đã push). Còn lại: seed Pexels (cần API key), smoke test AI (cần Anthropic key), review bảo mật Phase 7, deploy.
 
 **Ranh giới file:** mỗi agent chỉ sửa file trong vùng của mình (ghi rõ trong từng phase). Phần dùng chung như types, schema, UI primitives và hàm client đều được chốt ở Phase 1. Agent cần sửa file dùng chung thì báo lại cho mình, không tự sửa.
 
