@@ -80,4 +80,6 @@ Hàm client chốt ở Phase 1, các agent khác import:
 - `<PlacePicker value onChange />` trong `src/components/place/place-picker.tsx` (D implement, B dùng)
 - `toggleFavorite(poseId)` trong `src/lib/poses/favorites.ts` (A implement)
 - `addPosesToShoot(shootId, poseIds)` trong `src/lib/shoots/shoot-items.ts` (D implement, A gọi từ card/detail)
+- `<PoseCard>` trong `src/components/pose/pose-card.tsx` và `<PoseCardGrid>` trong `src/components/pose/pose-card-grid.tsx` (A implement; C dùng cho kết quả gợi ý, D dùng cho chi tiết địa điểm)
+- `getPoseCardsByIds()` / `listPoseCards()` trong `src/lib/poses/pose-card-query.ts` (A implement; C và D gọi)
 Phase 1 tạo các file này với **signature + JSDoc + `throw new Error('not implemented')`**. Agent sở hữu file sẽ thay bằng code thật, và Phase 6 kiểm tra không còn chỗ `not implemented` nào.
