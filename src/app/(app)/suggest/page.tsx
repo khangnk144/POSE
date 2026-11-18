@@ -1,8 +1,12 @@
 import type { Metadata } from 'next';
+import { SuggestScreen } from '@/components/ai/suggest-screen';
+import { isAiConfigured } from '@/lib/ai/ai-availability';
 
 export const metadata: Metadata = { title: 'AI gợi ý dáng' };
 
-/** Placeholder: the owning phase replaces this page. */
+// Reads env at request time so adding the API key unlocks the tab without a rebuild.
+export const dynamic = 'force-dynamic';
+
 export default function SuggestPage() {
-  return <h1 className="font-display text-[22px] font-bold leading-[30px]">AI gợi ý dáng</h1>;
+  return <SuggestScreen aiEnabled={isAiConfigured()} />;
 }
