@@ -26,10 +26,10 @@ Web app mobile-first, riêng tư cho team. Mỗi "dáng" gồm 1–5 ảnh mẫu
 | 4 | [AI: điền giúp + gợi ý dáng](phase-04-ai-features.md) | agent C | ✅ | ✅ 2026-11-18 |
 | 5 | [Buổi chụp, địa điểm, team, presence](phase-05-shoots-places-team.md) | agent D | ✅ | ✅ 2026-11-18 |
 | 6 | [Tích hợp + seed data](phase-06-integration-seed.md) | mình | ❌ sau 2–5 | 🟡 tích hợp ✅ (231 unit · 26 RLS · 20 e2e x2 pass); seed Pexels chờ API key |
-| 8 | [Thêm dáng dễ dùng cho người không rành máy](phase-08-easy-upload-ux.md) | Fable thiết kế, 1 agent code | ❌ sau khi sửa xong review | ⬜ |
-| 7 | [Test + review + deploy](phase-07-test-review-deploy.md) | tester + code-reviewer song song, rồi fix | ❌ | 🟡 review đang chạy; deploy chờ tài khoản |
+| 8 | [Thêm dáng dễ dùng cho người không rành máy](phase-08-easy-upload-ux.md) | Fable thiết kế, 1 agent code | ❌ sau khi sửa xong review | ✅ 2026-11-19 |
+| 7 | [Test + review + deploy](phase-07-test-review-deploy.md) | tester + code-reviewer song song, rồi fix | ❌ | 🟡 review ✅ + 9 finding đã sửa (272 unit · 34 RLS · 22 e2e x2 pass); deploy chờ tài khoản Supabase + Vercel |
 
-**Trạng thái 2026-11-18 tối:** Phase 1–5 xong và đã gộp vào `main` (đã push). Còn lại: seed Pexels (cần API key), smoke test AI (cần Anthropic key), review bảo mật Phase 7, deploy.
+**Trạng thái 2026-11-19:** Phase 1–6 và 8 xong, review bảo mật đã sửa, tất cả đã push lên `main`. Còn lại: deploy (Supabase + Vercel), smoke test AI (cần Anthropic key), seed Pexels (tuỳ chọn), thử trên iPhone thật.
 
 **Ranh giới file:** mỗi agent chỉ sửa file trong vùng của mình (ghi rõ trong từng phase). Phần dùng chung như types, schema, UI primitives và hàm client đều được chốt ở Phase 1. Agent cần sửa file dùng chung thì báo lại cho mình, không tự sửa.
 
