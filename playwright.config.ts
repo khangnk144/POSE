@@ -4,6 +4,9 @@ import { defineConfig } from '@playwright/test';
 export default defineConfig({
   testDir: './tests/e2e',
   timeout: 60_000,
+  // Local Supabase in Docker can take ~5s for insert + next page render under load (seen in a trace),
+  // so the 5s default made navigation asserts flaky.
+  expect: { timeout: 10_000 },
   fullyParallel: false,
   // One worker: specs share one local Supabase and the dev server compiles routes on first hit,
   // so parallel files time out waiting on cold compiles.

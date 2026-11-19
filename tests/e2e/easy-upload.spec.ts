@@ -65,7 +65,7 @@ test('quick add (image + title), "Thiếu thông số", "Cần bổ sung" filter
   // Adding a camera height and one step removes the label and the invitation.
   await heights.getByRole('radio', { name: 'Ngang hông', exact: true }).click();
   await page.getByRole('button', { name: 'Thêm bước' }).click();
-  await page.getByLabel('Bước 1').fill('Nghiêng vai về phía máy');
+  await page.getByLabel('Bước 1', { exact: true }).fill('Nghiêng vai về phía máy');
   await page.getByRole('button', { name: 'Lưu thay đổi' }).click();
   await expect(page).toHaveURL(new RegExp(`/poses/${id}$`));
   await expect(page.getByRole('region', { name: 'Cần bổ sung' })).toHaveCount(0);
