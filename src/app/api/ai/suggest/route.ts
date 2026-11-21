@@ -1,10 +1,10 @@
 import { z } from 'zod';
 import { claudeFailureResponse, guardAiRequest, jsonError, spendQuotaOrResponse } from '@/lib/ai/ai-route-guard';
-import { callClaudeTool } from '@/lib/ai/claude-client';
+import { callClaudeJson } from '@/lib/ai/claude-client';
 import { MAX_UPLOAD_BYTES, toClaudeImage } from '@/lib/ai/image-input';
 import { parseSuggestOutput } from '@/lib/ai/parse-ai-output';
 import { buildCatalog, type CatalogRow } from '@/lib/ai/prompts/pose-catalog';
-import { SUGGEST_SYSTEM, SUGGEST_TOOL, suggestUserText } from '@/lib/ai/prompts/suggest-prompt';
+import { SUGGEST_SCHEMA, SUGGEST_SYSTEM, suggestUserText } from '@/lib/ai/prompts/suggest-prompt';
 import { createSupabaseServerClient } from '@/lib/supabase/server-client';
 import { PEOPLE_COUNTS } from '@/lib/types/pose';
 
@@ -50,13 +50,15 @@ export async function POST(request: Request): Promise<Response> {
   if (blocked) return blocked;
 
   try {
-    const { input, usage } = await callClaudeTool({
+    const { output: input, usage } = await callClaudeJson({
       system: SUGGEST_SYSTEM,
       cachedContext: catalog.text,
       userText: suggestUserText(people.data),
       images: [image],
-      tool: SUGGEST_TOOL,
-      maxTokens: 4000,
+      schema: SUGGEST_SCHEMA,
+      // Thinking is always on and counts toward max_tokens; medium effort for matching + 3 ideas.
+      maxTokens: 12000,
+      effort: 'medium',
       signal: request.signal,
     });
     const result = parseSuggestOutput(input, catalog.refToPoseId);

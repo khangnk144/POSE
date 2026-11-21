@@ -1,6 +1,7 @@
 import 'server-only';
 import Anthropic from '@anthropic-ai/sdk';
-import type { Message, Tool } from '@anthropic-ai/sdk/resources/messages/messages';
+import { jsonSchemaOutputFormat } from '@anthropic-ai/sdk/helpers/json-schema';
+import type { OutputConfig, StopReason } from '@anthropic-ai/sdk/resources/messages/messages';
 import { CLAUDE_TIMEOUT_MS, getAiModel } from './ai-config';
 
 export type ImageMediaType = 'image/jpeg' | 'image/png' | 'image/webp';
@@ -19,27 +20,32 @@ export class AiCallError extends Error {
   }
 }
 
-export type ClaudeToolCall = {
+/** A JSON Schema for an object; the SDK adapts it to what structured outputs accept. */
+export type JsonObjectSchema = { type: 'object'; properties: Record<string, unknown>; required?: readonly string[] };
+
+export type ClaudeJsonCall = {
   system: string;
   /** Large, rarely changing context (the pose catalog). Marked cacheable so repeat calls are cheaper. */
   cachedContext?: string;
   userText: string;
   images: ClaudeImage[];
-  tool: Tool;
+  /** The answer must be one JSON object matching this schema (structured outputs). */
+  schema: JsonObjectSchema;
+  /** Thinking is always on for current models and counts toward this, so leave room. */
   maxTokens: number;
+  effort: NonNullable<OutputConfig['effort']>;
   /** Abort when the user cancels (pass the request's signal). */
   signal?: AbortSignal;
 };
 
 export type ClaudeUsage = { inputTokens: number; outputTokens: number; cacheReadTokens: number; cacheWriteTokens: number };
 
-/** Pull the forced tool's input out of a response. Throws `bad_output` when it is missing or cut off. */
-export function extractToolInput(message: Pick<Message, 'content' | 'stop_reason'>, toolName: string): unknown {
+/** Return the parsed JSON answer. Throws `bad_output` when it is missing, cut off or refused. */
+export function readStructuredOutput(message: { stop_reason: StopReason | null; parsed_output?: unknown }): unknown {
   if (message.stop_reason === 'max_tokens') throw new AiCallError('bad_output', 'response cut off at max_tokens');
-  for (const block of message.content) {
-    if (block.type === 'tool_use' && block.name === toolName) return block.input;
-  }
-  throw new AiCallError('bad_output', `no ${toolName} tool_use block in response`);
+  if (message.stop_reason === 'refusal') throw new AiCallError('bad_output', 'model refused');
+  if (message.parsed_output == null) throw new AiCallError('bad_output', 'no structured output in response');
+  return message.parsed_output;
 }
 
 export function mapSdkError(e: unknown): AiCallError {
@@ -57,23 +63,25 @@ export function mapSdkError(e: unknown): AiCallError {
   return new AiCallError('upstream', e instanceof Error ? e.message : 'unknown claude error');
 }
 
-/** One Claude call that must answer through `tool` (forced tool use => structured JSON input). */
-export async function callClaudeTool(call: ClaudeToolCall): Promise<{ input: unknown; usage: ClaudeUsage }> {
+/**
+ * One Claude call whose answer is a JSON object matching `schema` (structured outputs via
+ * `output_config.format`; forced `tool_choice` is rejected by current models).
+ */
+export async function callClaudeJson(call: ClaudeJsonCall): Promise<{ output: unknown; usage: ClaudeUsage }> {
   // Created per call so a key added to the environment is picked up without a rebuild.
   const client = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY, maxRetries: 0 });
   try {
-    const message = await client.messages.create(
+    const message = await client.messages.parse(
       {
         model: getAiModel(),
         max_tokens: call.maxTokens,
+        output_config: { effort: call.effort, format: jsonSchemaOutputFormat(call.schema as { type: 'object' }) },
         system: [
           { type: 'text', text: call.system },
           ...(call.cachedContext
             ? [{ type: 'text' as const, text: call.cachedContext, cache_control: { type: 'ephemeral' as const } }]
             : []),
         ],
-        tools: [call.tool],
-        tool_choice: { type: 'tool', name: call.tool.name },
         messages: [
           {
             role: 'user',
@@ -89,10 +97,10 @@ export async function callClaudeTool(call: ClaudeToolCall): Promise<{ input: unk
       },
       { signal: call.signal, timeout: CLAUDE_TIMEOUT_MS },
     );
-    const input = extractToolInput(message, call.tool.name);
+    const output = readStructuredOutput(message);
     const u = message.usage;
     return {
-      input,
+      output,
       usage: {
         inputTokens: u.input_tokens,
         outputTokens: u.output_tokens,

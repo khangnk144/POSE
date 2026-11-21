@@ -3,14 +3,14 @@ import { beforeEach, describe, expect, it, vi } from 'vitest';
 vi.mock('server-only', () => ({}));
 
 const mocks = vi.hoisted(() => ({
-  callClaudeTool: vi.fn(),
+  callClaudeJson: vi.fn(),
   spendQuota: vi.fn(),
   loadStoredImages: vi.fn(),
 }));
 
 vi.mock('@/lib/ai/claude-client', async (importActual) => ({
   ...(await importActual<typeof import('@/lib/ai/claude-client')>()),
-  callClaudeTool: mocks.callClaudeTool,
+  callClaudeJson: mocks.callClaudeJson,
 }));
 vi.mock('@/lib/ai/ai-route-guard', async (importActual) => ({
   ...(await importActual<typeof import('@/lib/ai/ai-route-guard')>()),
@@ -39,8 +39,8 @@ beforeEach(() => {
   vi.clearAllMocks();
   mocks.spendQuota.mockResolvedValue(null);
   mocks.loadStoredImages.mockResolvedValue([{ mediaType: 'image/jpeg', base64: 'AAAA' }]);
-  mocks.callClaudeTool.mockResolvedValue({
-    input: { title: 'Ngồi sofa', cameraHeight: 'moon', posture: 'sit' },
+  mocks.callClaudeJson.mockResolvedValue({
+    output: { title: 'Ngồi sofa', cameraHeight: 'moon', posture: 'sit' },
     usage: { inputTokens: 1, outputTokens: 1, cacheReadTokens: 0, cacheWriteTokens: 0 },
   });
 });
@@ -49,8 +49,8 @@ describe('POST /api/ai/autofill with a caption', () => {
   it('forwards the caption to the model inside the data block of the user message only', async () => {
     const res = await post({ imageIds: [ID], caption: INJECTION });
     expect(res.status).toBe(200);
-    expect(mocks.callClaudeTool).toHaveBeenCalledTimes(1);
-    const call = mocks.callClaudeTool.mock.calls[0]?.[0] as { system: string; userText: string; cachedContext?: string };
+    expect(mocks.callClaudeJson).toHaveBeenCalledTimes(1);
+    const call = mocks.callClaudeJson.mock.calls[0]?.[0] as { system: string; userText: string; cachedContext?: string };
     expect(call.system).toBe(AUTOFILL_SYSTEM);
     expect(call.system).not.toContain(INJECTION);
     expect(call.cachedContext ?? '').not.toContain(INJECTION);
@@ -71,7 +71,7 @@ describe('POST /api/ai/autofill with a caption', () => {
 
   it('sends no data block when there is no caption', async () => {
     await post({ imageIds: [ID] });
-    const call = mocks.callClaudeTool.mock.calls[0]?.[0] as { userText: string };
+    const call = mocks.callClaudeJson.mock.calls[0]?.[0] as { userText: string };
     expect(call.userText).not.toContain(`<${CAPTION_TAG}>`);
   });
 
@@ -79,6 +79,6 @@ describe('POST /api/ai/autofill with a caption', () => {
     const res = await post({ imageIds: [ID], caption: 'a'.repeat(2001) });
     expect(res.status).toBe(400);
     expect(mocks.spendQuota).not.toHaveBeenCalled();
-    expect(mocks.callClaudeTool).not.toHaveBeenCalled();
+    expect(mocks.callClaudeJson).not.toHaveBeenCalled();
   });
 });

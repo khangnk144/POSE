@@ -1,7 +1,7 @@
-import { AUTOFILL_SYSTEM, AUTOFILL_TOOL, autofillUserText } from '@/lib/ai/prompts/autofill-prompt';
+import { AUTOFILL_SCHEMA, AUTOFILL_SYSTEM, autofillUserText } from '@/lib/ai/prompts/autofill-prompt';
 import { claudeFailureResponse, guardAiRequest, jsonError, spendQuotaOrResponse } from '@/lib/ai/ai-route-guard';
 import { MAX_AUTOFILL_IMAGES, readAutofillInput } from '@/lib/ai/autofill-input';
-import { callClaudeTool } from '@/lib/ai/claude-client';
+import { callClaudeJson } from '@/lib/ai/claude-client';
 import { loadStoredImages } from '@/lib/ai/load-stored-images';
 import { parsePoseFields } from '@/lib/ai/parse-ai-output';
 import { createSupabaseServerClient } from '@/lib/supabase/server-client';
@@ -28,14 +28,16 @@ export async function POST(request: Request): Promise<Response> {
   if (blocked) return blocked;
 
   try {
-    const { input: raw, usage } = await callClaudeTool({
+    const { output: raw, usage } = await callClaudeJson({
       system: AUTOFILL_SYSTEM,
       // The caption is user-pasted text: it only ever travels inside the delimited data block of
       // the user message, never in the system prompt.
       userText: autofillUserText(images.length, input.caption),
       images,
-      tool: AUTOFILL_TOOL,
-      maxTokens: 1500,
+      schema: AUTOFILL_SCHEMA,
+      // Thinking is always on and counts toward max_tokens; low effort keeps a photo read fast.
+      maxTokens: 8000,
+      effort: 'low',
       signal: request.signal,
     });
     const draft = parsePoseFields(raw);
