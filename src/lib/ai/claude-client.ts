@@ -1,6 +1,5 @@
 import 'server-only';
 import Anthropic from '@anthropic-ai/sdk';
-import { jsonSchemaOutputFormat } from '@anthropic-ai/sdk/helpers/json-schema';
 import type { OutputConfig, StopReason } from '@anthropic-ai/sdk/resources/messages/messages';
 import { CLAUDE_TIMEOUT_MS, getAiModel } from './ai-config';
 
@@ -20,7 +19,7 @@ export class AiCallError extends Error {
   }
 }
 
-/** A JSON Schema for an object; the SDK adapts it to what structured outputs accept. */
+/** A JSON Schema for an object, sent to the model as text in the system prompt. */
 export type JsonObjectSchema = { type: 'object'; properties: Record<string, unknown>; required?: readonly string[] };
 
 export type ClaudeJsonCall = {
@@ -29,7 +28,7 @@ export type ClaudeJsonCall = {
   cachedContext?: string;
   userText: string;
   images: ClaudeImage[];
-  /** The answer must be one JSON object matching this schema (structured outputs). */
+  /** The answer must be one JSON object matching this schema (told to the model, validated by the caller). */
   schema: JsonObjectSchema;
   /** Thinking is always on for current models and counts toward this, so leave room. */
   maxTokens: number;
@@ -40,12 +39,28 @@ export type ClaudeJsonCall = {
 
 export type ClaudeUsage = { inputTokens: number; outputTokens: number; cacheReadTokens: number; cacheWriteTokens: number };
 
-/** Return the parsed JSON answer. Throws `bad_output` when it is missing, cut off or refused. */
-export function readStructuredOutput(message: { stop_reason: StopReason | null; parsed_output?: unknown }): unknown {
+/**
+ * Return the JSON object in the model's text answer (tolerates a ```json fence or stray words
+ * around it). Throws `bad_output` when it is missing, cut off, refused or not valid JSON.
+ * Field-level validation is the caller's job (parse-ai-output.ts drops invalid fields).
+ */
+export function readJsonAnswer(message: { stop_reason: StopReason | null; content: Array<{ type: string; text?: string }> }): unknown {
   if (message.stop_reason === 'max_tokens') throw new AiCallError('bad_output', 'response cut off at max_tokens');
   if (message.stop_reason === 'refusal') throw new AiCallError('bad_output', 'model refused');
-  if (message.parsed_output == null) throw new AiCallError('bad_output', 'no structured output in response');
-  return message.parsed_output;
+  const text = message.content.map((b) => (b.type === 'text' ? (b.text ?? '') : '')).join('');
+  const start = text.indexOf('{');
+  const end = text.lastIndexOf('}');
+  if (start < 0 || end <= start) throw new AiCallError('bad_output', 'no JSON object in response');
+  try {
+    return JSON.parse(text.slice(start, end + 1));
+  } catch {
+    throw new AiCallError('bad_output', 'response is not valid JSON');
+  }
+}
+
+/** Instruction telling the model the exact JSON shape (sent as text: the schema is too complex for structured outputs). */
+export function jsonAnswerInstruction(schema: JsonObjectSchema): string {
+  return `Chỉ trả lời bằng MỘT đối tượng JSON hợp lệ, không kèm chữ nào khác và không dùng markdown. Tên khóa, kiểu dữ liệu và giá trị cho phép theo JSON Schema sau; khóa nào không chắc thì bỏ hẳn khóa đó:\n${JSON.stringify(schema)}`;
 }
 
 export function mapSdkError(e: unknown): AiCallError {
@@ -64,20 +79,22 @@ export function mapSdkError(e: unknown): AiCallError {
 }
 
 /**
- * One Claude call whose answer is a JSON object matching `schema` (structured outputs via
- * `output_config.format`; forced `tool_choice` is rejected by current models).
+ * One Claude call whose answer is a JSON object shaped by `schema`. The schema goes in the system
+ * prompt as text: forced `tool_choice` is rejected by current models, and structured outputs
+ * (`output_config.format`) rejected this schema as "too complex" after ~56s (measured).
  */
 export async function callClaudeJson(call: ClaudeJsonCall): Promise<{ output: unknown; usage: ClaudeUsage }> {
   // Created per call so a key added to the environment is picked up without a rebuild.
   const client = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY, maxRetries: 0 });
   try {
-    const message = await client.messages.parse(
+    const message = await client.messages.create(
       {
         model: getAiModel(),
         max_tokens: call.maxTokens,
-        output_config: { effort: call.effort, format: jsonSchemaOutputFormat(call.schema as { type: 'object' }) },
+        output_config: { effort: call.effort },
         system: [
           { type: 'text', text: call.system },
+          { type: 'text', text: jsonAnswerInstruction(call.schema) },
           ...(call.cachedContext
             ? [{ type: 'text' as const, text: call.cachedContext, cache_control: { type: 'ephemeral' as const } }]
             : []),
@@ -97,7 +114,7 @@ export async function callClaudeJson(call: ClaudeJsonCall): Promise<{ output: un
       },
       { signal: call.signal, timeout: CLAUDE_TIMEOUT_MS },
     );
-    const output = readStructuredOutput(message);
+    const output = readJsonAnswer(message);
     const u = message.usage;
     return {
       output,

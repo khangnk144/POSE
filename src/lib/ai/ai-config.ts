@@ -1,9 +1,9 @@
 import 'server-only';
 
-export const DEFAULT_AI_MODEL = 'claude-sonnet-5-5';
+export const DEFAULT_AI_MODEL = 'claude-haiku-5-5';
 export const DEFAULT_DAILY_LIMIT = 40;
 
-/** Model used by both AI routes. Override with AI_MODEL (e.g. claude-haiku-5-5 for lower cost). */
+/** Model used by both AI routes. Override with AI_MODEL (e.g. claude-sonnet-5-5 for more detail at ~14x the cost). */
 export function getAiModel(): string {
   return process.env.AI_MODEL?.trim() || DEFAULT_AI_MODEL;
 }

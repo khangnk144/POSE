@@ -3,23 +3,36 @@ import { describe, expect, it, vi } from 'vitest';
 vi.mock('server-only', () => ({}));
 
 import Anthropic from '@anthropic-ai/sdk';
-import { AiCallError, mapSdkError, readStructuredOutput } from './claude-client';
+import { AiCallError, mapSdkError, readJsonAnswer } from './claude-client';
 
-describe('readStructuredOutput', () => {
-  it('returns the parsed JSON answer', () => {
-    expect(readStructuredOutput({ stop_reason: 'end_turn', parsed_output: { title: 'x' } })).toEqual({ title: 'x' });
+describe('readJsonAnswer', () => {
+  const msg = (text: string, stopReason = 'end_turn') =>
+    ({ stop_reason: stopReason, content: [{ type: 'text', text }] }) as Parameters<typeof readJsonAnswer>[0];
+  const fence = '`'.repeat(3);
+
+  it('parses a bare JSON object', () => {
+    expect(readJsonAnswer(msg('{"title":"x"}'))).toEqual({ title: 'x' });
   });
 
-  it('throws bad_output when there is no structured output', () => {
-    expect(() => readStructuredOutput({ stop_reason: 'end_turn', parsed_output: null })).toThrow(AiCallError);
+  it('parses JSON wrapped in a markdown fence or stray words', () => {
+    expect(readJsonAnswer(msg(`Đây nhé:\n${fence}json\n{"title":"Ngồi sofa"}\n${fence}`))).toEqual({ title: 'Ngồi sofa' });
   });
 
-  it('throws bad_output when the answer was cut off at max_tokens', () => {
-    expect(() => readStructuredOutput({ stop_reason: 'max_tokens', parsed_output: { title: 'x' } })).toThrow(/max_tokens/);
+  it('reads only text blocks (ignores thinking blocks)', () => {
+    const m = { stop_reason: 'end_turn', content: [{ type: 'thinking' }, { type: 'text', text: '{"a":1}' }] } as Parameters<
+      typeof readJsonAnswer
+    >[0];
+    expect(readJsonAnswer(m)).toEqual({ a: 1 });
   });
 
-  it('throws bad_output when the model refused', () => {
-    expect(() => readStructuredOutput({ stop_reason: 'refusal', parsed_output: null })).toThrow(/refused/);
+  it('throws bad_output for missing or broken JSON', () => {
+    expect(() => readJsonAnswer(msg('không có json'))).toThrow(AiCallError);
+    expect(() => readJsonAnswer(msg('{"title": '))).toThrow(AiCallError);
+  });
+
+  it('throws bad_output when cut off at max_tokens or refused', () => {
+    expect(() => readJsonAnswer(msg('{"title":"x"}', 'max_tokens'))).toThrow(/max_tokens/);
+    expect(() => readJsonAnswer(msg('', 'refusal'))).toThrow(/refused/);
   });
 });
 

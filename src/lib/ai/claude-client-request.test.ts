@@ -5,7 +5,8 @@ vi.mock('server-only', () => ({}));
 import { callClaudeJson } from './claude-client';
 
 // SYNTHETIC response shaped like the Messages API reply, not a recorded one: this test checks
-// the request we send (current models reject forced tool_choice with a 400).
+// the request we send. Forced tool_choice is a 400 on current models and structured outputs
+// rejected this schema as too complex, so the schema travels as text and the answer is JSON text.
 const reply = {
   id: 'msg_x',
   type: 'message',
@@ -37,7 +38,7 @@ afterEach(() => {
 });
 
 describe('callClaudeJson request', () => {
-  it('asks for structured JSON output instead of a forced tool call, and parses the answer', async () => {
+  it('sends the schema as text with no tools or output format, and parses the JSON answer', async () => {
     const { output, usage } = await callClaudeJson({
       system: 'sys',
       userText: 'hi',
@@ -50,10 +51,9 @@ describe('callClaudeJson request', () => {
     expect(sentBody).toBeDefined();
     expect(sentBody).not.toHaveProperty('tools');
     expect(sentBody).not.toHaveProperty('tool_choice');
-    const config = sentBody?.output_config as { effort: string; format: { type: string; schema: Record<string, unknown> } };
-    expect(config.effort).toBe('low');
-    expect(config.format.type).toBe('json_schema');
-    expect(config.format.schema.additionalProperties).toBe(false);
+    expect(sentBody?.output_config).toEqual({ effort: 'low' });
+    const system = sentBody?.system as Array<{ text: string }>;
+    expect(system.map((b) => b.text).join('\n')).toContain('"title":{"type":"string"}');
     expect(output).toEqual({ title: 'Ngồi sofa' });
     expect(usage.inputTokens).toBe(10);
   });
