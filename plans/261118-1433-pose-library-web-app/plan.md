@@ -2,7 +2,7 @@
 
 **Status:** ✅ Đã duyệt 2026-11-18 (tên **Pose Xinh**, các default còn lại giữ nguyên, AI điền giúp chỉ chạy khi bấm nút) · **Work context:** `d:\POSE`
 
-Web app mobile-first, riêng tư cho team. Mỗi "dáng" gồm 1–5 ảnh mẫu, cách cầm máy (độ cao, góc nghiêng, zoom, khung, đứng đâu/cách bao xa, vị trí trên lưới 1/3), cách tạo dáng, địa điểm và tag. Team tự upload dáng, kể cả ảnh lưu từ Pinterest/IG/TikTok. AI (Claude vision) giúp ở 2 chỗ: tự điền form từ ảnh, và chụp bối cảnh để được gợi ý dáng.
+Web app mobile-first, riêng tư cho team. Mỗi "dáng" gồm 1–10 ảnh mẫu, cách cầm máy (độ cao, góc nghiêng, zoom, khung, đứng đâu/cách bao xa, vị trí trên lưới 1/3), cách tạo dáng, địa điểm và tag. Team tự upload dáng, kể cả ảnh lưu từ Pinterest/IG/TikTok. AI (Claude vision) giúp ở 2 chỗ: tự điền form từ ảnh, và chụp bối cảnh để được gợi ý dáng.
 
 ## Tài liệu trong plan
 | File | Nội dung |

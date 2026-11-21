@@ -1,6 +1,6 @@
 import type { ProcessedImage } from '@/lib/images/process-image';
 
-export const MAX_IMAGES = 5;
+export const MAX_IMAGES = 10;
 
 /** An image already stored for the pose (edit mode). */
 export type ExistingImage = {

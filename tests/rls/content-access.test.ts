@@ -75,6 +75,15 @@ describe('content RLS', () => {
     expect(byAlice.data).toHaveLength(1);
   });
 
+  it('allows up to 10 images per pose (positions 0-9) and rejects an 11th slot', async () => {
+    const img = (position: number) => ({ pose_id: bobPoseId, position, full_path: `poses/x/${position}-full.webp`, thumb_path: `poses/x/${position}-thumb.webp` });
+    const tenth = await bob.client.from('pose_images').insert(img(9)).select().single();
+    expect(tenth.error).toBeNull();
+    const eleventh = await bob.client.from('pose_images').insert(img(10));
+    expect(eleventh.error).not.toBeNull();
+    await bob.client.from('pose_images').delete().eq('id', tenth.data!.id);
+  });
+
   it('refuses to create a pose in someone else name', async () => {
     const { error } = await alice.client.from('poses').insert({ title: 'Forged', created_by: bob.id });
     expect(error).not.toBeNull();

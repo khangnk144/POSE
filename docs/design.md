@@ -334,7 +334,7 @@ Icon tự vẽ (không có sẵn): bộ 6 hình người que thể hiện **đ�
 
 ### ImagePicker
 - Khi trống: khung nét đứt 2px `--border-strong`, `--radius-lg`, cao 200px, có ba nút: "Chọn ảnh", "Dán ảnh", "Dán link ảnh". Cũng nhận kéo-thả file và phím tắt dán ở desktop.
-- Khi có ảnh: hàng thumbnail 72×96 cuộn ngang, ảnh đầu có nhãn "Bìa". Nhấn giữ để kéo đổi thứ tự; mỗi thumbnail có nút xoá 24px (vùng chạm 44px). Ô cuối là nút thêm, ẩn khi đủ 5 ảnh.
+- Khi có ảnh: hàng thumbnail 72×96 cuộn ngang, ảnh đầu có nhãn "Bìa". Nhấn giữ để kéo đổi thứ tự; mỗi thumbnail có nút xoá 24px (vùng chạm 44px). Ô cuối là nút thêm, ẩn khi đủ 10 ảnh.
 - Mỗi ảnh đang tải lên có vòng tiến độ đè lên; lỗi thì viền `--danger` và nút "Thử lại".
 - "Dán link ảnh" mở ô nhập URL; nếu không tải được thì báo "Link này không lấy được ảnh. Bạn lưu ảnh về máy rồi chọn lại nhé." Chưa kiểm chứng: nhiều mạng xã hội chặn tải ảnh trực tiếp từ URL, nên tính năng này có thể chỉ chạy được với một phần link.
 
@@ -509,7 +509,7 @@ Icon tự vẽ (không có sẵn): bộ 6 hình người que thể hiện **đ�
 │ (✕)        Thêm dáng           Lưu   │
 │ ┌─────┐ ┌─────┐ ┌ ─ ─ ┐              │
 │ │ Bìa │ │ ảnh │   +                  │
-│ │  ✕  │ │  ✕  │ └ ─ ─ ┘   (tối đa 5) │
+│ │  ✕  │ │  ✕  │ └ ─ ─ ┘   (tối đa 10) │
 │ └─────┘ └─────┘                      │
 │ [Chọn ảnh] [Dán ảnh] [Dán link ảnh]  │
 │ ┌──────────────────────────────────┐ │
