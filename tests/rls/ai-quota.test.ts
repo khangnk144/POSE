@@ -7,13 +7,23 @@ const spend = (client: { rpc: unknown }, userId: string, limit: number): RpcResu
   (client.rpc as (fn: string, args: object) => RpcResult)('consume_ai_quota', { p_user_id: userId, p_limit: limit });
 
 describe('consume_ai_quota', () => {
+  let owner: TestUser; // first joined user = admin
   let alice: TestUser;
   let bob: TestUser;
 
   beforeAll(async () => {
     await resetTeam();
+    owner = await createMember('owner', 'Owner');
     alice = await createMember('alice', 'Alice');
     bob = await createMember('bob', 'Bob');
+  });
+
+  it('never limits an admin, but still counts their calls', async () => {
+    const results: (number | null)[] = [];
+    for (let i = 0; i < 4; i++) results.push((await spend(admin, owner.id, 2)).data);
+    expect(results).toEqual([1, 2, 3, 4]);
+    const { data } = await admin.from('ai_usage').select('count').eq('user_id', owner.id).single();
+    expect(data?.count).toBe(4);
   });
 
   it('counts up to the limit, then returns -1 without incrementing further', async () => {
