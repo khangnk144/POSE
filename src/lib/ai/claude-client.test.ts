@@ -2,7 +2,8 @@ import { describe, expect, it, vi } from 'vitest';
 
 vi.mock('server-only', () => ({}));
 
-import { AiCallError, extractToolInput } from './claude-client';
+import Anthropic from '@anthropic-ai/sdk';
+import { AiCallError, extractToolInput, mapSdkError } from './claude-client';
 
 // SYNTHETIC message shapes (see Message / ToolUseBlock in the SDK types), not recorded responses.
 const toolUse = (input: unknown, name = 'fill_pose') => ({
@@ -33,5 +34,21 @@ describe('extractToolInput', () => {
   it('ignores tool_use blocks for other tools', () => {
     const msg = { stop_reason: 'tool_use', content: [toolUse({}, 'other')] };
     expect(() => extractToolInput(msg as never, 'fill_pose')).toThrow(AiCallError);
+  });
+});
+
+describe('mapSdkError', () => {
+  it("keeps Anthropic's explanation for a 400 so the server log says why", () => {
+    const body = { type: 'error', error: { type: 'invalid_request_error', message: 'Your credit balance is too low' } };
+    const err = mapSdkError(Anthropic.APIError.generate(400, body, undefined, new Headers()));
+    expect(err.kind).toBe('upstream');
+    expect(err.message).toContain('claude api status 400');
+    expect(err.message).toContain('invalid_request_error');
+    expect(err.message).toContain('Your credit balance is too low');
+  });
+
+  it('treats overload as busy', () => {
+    const err = mapSdkError(Anthropic.APIError.generate(529, undefined, undefined, new Headers()));
+    expect(err.kind).toBe('busy');
   });
 });

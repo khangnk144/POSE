@@ -42,13 +42,17 @@ export function extractToolInput(message: Pick<Message, 'content' | 'stop_reason
   throw new AiCallError('bad_output', `no ${toolName} tool_use block in response`);
 }
 
-function mapSdkError(e: unknown): AiCallError {
+export function mapSdkError(e: unknown): AiCallError {
   if (e instanceof AiCallError) return e;
   if (e instanceof Anthropic.APIUserAbortError) return new AiCallError('aborted', 'request aborted');
   if (e instanceof Anthropic.APIConnectionTimeoutError) return new AiCallError('timeout', 'claude timeout');
   if (e instanceof Anthropic.APIError) {
     const busy = e.status === 429 || e.status === 529 || e.status === 503;
-    return new AiCallError(busy ? 'busy' : 'upstream', `claude api status ${e.status ?? 'none'}`);
+    // Anthropic's own explanation (never contains the key) so server logs show why a call failed.
+    const detail = [e.type, e.errorCode, e.apiMessage?.slice(0, 300), e.requestID && `request ${e.requestID}`]
+      .filter(Boolean)
+      .join(' | ');
+    return new AiCallError(busy ? 'busy' : 'upstream', `claude api status ${e.status ?? 'none'}${detail ? `: ${detail}` : ''}`);
   }
   return new AiCallError('upstream', e instanceof Error ? e.message : 'unknown claude error');
 }
